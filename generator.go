@@ -3,6 +3,7 @@ package idgenerator
 import (
 	"math/big"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -29,6 +30,8 @@ type Generator interface {
 }
 
 type generator struct {
+	sync.Mutex
+
 	epoch time.Time
 	time  int64
 	step  int64
@@ -62,6 +65,9 @@ func (g *generator) generateBits() string {
 }
 
 func (g *generator) timestamp() string {
+	g.Lock()
+	defer g.Unlock()
+
 	now := time.Since(g.epoch).Milliseconds()
 	if now == g.time {
 		g.step += 1
